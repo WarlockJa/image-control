@@ -36,7 +36,7 @@ export const generateImageAction = actionClient
     if (!response.ok || !response.body)
       throw new Error("Image generation failed");
 
-    return { image: response.text() };
+    return { image: response };
 
     // // fetching image creating input object for image caption AI
     // const inputs = {

@@ -40,6 +40,7 @@ export default function GenerateImage() {
       });
 
       console.log(data);
+      console.log(JSON.stringify(data));
 
       if (data?.image) setImage(`data:image/png;base64,${data.image}`);
     },
