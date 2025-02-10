@@ -21,12 +21,12 @@ export const generateImageAction = actionClient
     body.append("prompt", prompt);
 
     const response = await CWImgGeneration.fetch(
-      env.NEXT_PUBLIC_IMAGE_GENERATE_WORKER_URL,
+      env.IMAGE_GENERATE_WORKER_URL,
       {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
-          "x-access-key": env.NEXT_PUBLIC_ACCESS_KEY,
+          "x-access-key": env.ACCESS_KEY,
           "Access-Control-Allow-Origin": "*",
         },
         body,
@@ -36,7 +36,7 @@ export const generateImageAction = actionClient
     if (!response.ok || !response.body)
       throw new Error("Image generation failed");
 
-    return { image: response };
+    const reader = response.body.getReader();
 
     // // fetching image creating input object for image caption AI
     // const inputs = {
@@ -50,26 +50,26 @@ export const generateImageAction = actionClient
 
     // const reader = response.getReader();
 
-    // // Collect chunks of data
-    // const chunks = [];
-    // while (true) {
-    //   const { done, value } = await reader.read();
-    //   if (done) break; // Exit the loop when the stream is complete
-    //   chunks.push(value); // Add the chunk to the array
-    // }
+    // Collect chunks of data
+    const chunks = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break; // Exit the loop when the stream is complete
+      chunks.push(value); // Add the chunk to the array
+    }
 
-    // // Combine the chunks into a single Uint8Array
-    // const concatenatedChunks = new Uint8Array(
-    //   chunks.reduce((acc, chunk) => acc + chunk.length, 0)
-    // );
-    // let offset = 0;
-    // for (const chunk of chunks) {
-    //   concatenatedChunks.set(chunk, offset);
-    //   offset += chunk.length;
-    // }
+    // Combine the chunks into a single Uint8Array
+    const concatenatedChunks = new Uint8Array(
+      chunks.reduce((acc, chunk) => acc + chunk.length, 0)
+    );
+    let offset = 0;
+    for (const chunk of chunks) {
+      concatenatedChunks.set(chunk, offset);
+      offset += chunk.length;
+    }
 
-    // // Convert the Uint8Array to a base64-encoded string
-    // const base64Image = Buffer.from(concatenatedChunks).toString("base64");
+    // Convert the Uint8Array to a base64-encoded string
+    const base64Image = Buffer.from(concatenatedChunks).toString("base64");
 
     // const result = fs.writeFileSync(
     //   "./generatedimage.webp",
@@ -77,5 +77,5 @@ export const generateImageAction = actionClient
     // );
 
     // Return the base64-encoded image
-    // return { image: base64Image };
+    return { image: base64Image };
   });

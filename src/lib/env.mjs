@@ -17,8 +17,8 @@ export const env = createEnv({
    * 💡 You'll get type errors if these are not prefixed with NEXT_PUBLIC_.
    */
   client: {
-    NEXT_PUBLIC_IMAGE_GENERATE_WORKER_URL: z.string().min(1),
-    NEXT_PUBLIC_ACCESS_KEY: z.string().min(1),
+    IMAGE_GENERATE_WORKER_URL: z.string().min(1),
+    ACCESS_KEY: z.string().min(1),
   },
   /*
    * Due to how Next.js bundles environment variables on Edge and Client,
@@ -29,8 +29,7 @@ export const env = createEnv({
   runtimeEnv: {
     STABILITY_API_KEY: process.env.STABILITY_API_KEY,
     STABILITY_CONTROL_URL: process.env.STABILITY_CONTROL_URL,
-    NEXT_PUBLIC_IMAGE_GENERATE_WORKER_URL:
-      process.env.NEXT_PUBLIC_IMAGE_GENERATE_WORKER_URL,
-    NEXT_PUBLIC_ACCESS_KEY: process.env.NEXT_PUBLIC_ACCESS_KEY,
+    IMAGE_GENERATE_WORKER_URL: process.env.IMAGE_GENERATE_WORKER_URL,
+    ACCESS_KEY: process.env.ACCESS_KEY,
   },
 });
