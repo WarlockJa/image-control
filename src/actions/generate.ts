@@ -4,7 +4,8 @@
 import { actionClient } from "@/lib/safeAction";
 import { generateImageSchema } from "./schemas";
 import { rateLimitByIp } from "@/lib/rateLimiting/limiters";
-import { ai } from "@cf/ai";
+import { CWImgGeneration } from "@cf/CWImgGeneration";
+import { env } from "@/lib/env.mjs";
 
 // add location to the database
 export const generateImageAction = actionClient
@@ -16,33 +17,38 @@ export const generateImageAction = actionClient
       window: 60000,
     });
 
-    // const body = new FormData();
-    // body.append("prompt", prompt);
+    const body = new FormData();
+    body.append("prompt", prompt);
 
-    // const result = await CWImgGeneration.fetch(
-    //   env.NEXT_PUBLIC_IMAGE_GENERATE_WORKER_URL,
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "multipart/form-data",
-    //       "x-access-key": env.NEXT_PUBLIC_ACCESS_KEY,
-    //       "Access-Control-Allow-Origin": "*",
-    //     },
-    //     body,
-    //   }
-    // );
+    const response = await CWImgGeneration.fetch(
+      env.NEXT_PUBLIC_IMAGE_GENERATE_WORKER_URL,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "x-access-key": env.NEXT_PUBLIC_ACCESS_KEY,
+          "Access-Control-Allow-Origin": "*",
+        },
+        body,
+      }
+    );
 
-    // fetching image creating input object for image caption AI
-    const inputs = {
-      prompt,
-      // image: [...new Uint8Array(await exampleInputImage.arrayBuffer())],
-      // mask: [...new Uint8Array(await exampleMask.arrayBuffer())],
-    };
+    if (!response.ok || !response.body)
+      throw new Error("Image generation failed");
 
-    // const response = await env.AI.run('@cf/runwayml/stable-diffusion-v1-5-inpainting', inputs);
-    const response = await ai.run("@cf/lykon/dreamshaper-8-lcm", inputs);
+    const reader = response.body.getReader();
 
-    const reader = response.getReader();
+    // // fetching image creating input object for image caption AI
+    // const inputs = {
+    //   prompt,
+    //   // image: [...new Uint8Array(await exampleInputImage.arrayBuffer())],
+    //   // mask: [...new Uint8Array(await exampleMask.arrayBuffer())],
+    // };
+
+    // // const response = await env.AI.run('@cf/runwayml/stable-diffusion-v1-5-inpainting', inputs);
+    // const response = await ai.run("@cf/lykon/dreamshaper-8-lcm", inputs);
+
+    // const reader = response.getReader();
 
     // Collect chunks of data
     const chunks = [];
