@@ -39,6 +39,8 @@ export default function GenerateImage() {
         description: input.prompt,
       });
 
+      console.log(data);
+
       if (data?.image) setImage(`data:image/png;base64,${data.image}`);
     },
   });
