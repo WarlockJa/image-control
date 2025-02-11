@@ -146,7 +146,7 @@ export default function GenerateImage() {
   );
 
   return (
-    <>
+    <div className="max-w-screen-md w-screen mx-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
           <FormField
@@ -279,6 +279,6 @@ export default function GenerateImage() {
           className="object-contain"
         />
       )}
-    </>
+    </div>
   );
 }

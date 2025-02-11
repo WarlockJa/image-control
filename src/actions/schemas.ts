@@ -42,7 +42,7 @@ export const imageFileSchema = z.object({
 export type TImageFile = z.infer<typeof imageFileSchema>;
 
 export const generateImageSchema = z.object({
-  prompt: z.string(),
+  prompt: z.string({ required_error: "Prompt required" }).min(15).max(255),
   image: fileSchema.optional(),
   mask: fileSchema.optional(),
   // image: imageFileSchema.optional(),
