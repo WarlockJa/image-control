@@ -10,24 +10,28 @@ import { env } from "@/lib/env.mjs";
 // add location to the database
 export const generateImageAction = actionClient
   .schema(generateImageSchema)
-  .action(async ({ parsedInput: { prompt } }) => {
+  .action(async ({ parsedInput: { prompt, image, mask, width, height } }) => {
     await rateLimitByIp({
       key: "locations",
-      limit: 30,
-      window: 60000,
+      limit: 10,
+      window: 60 * 1000,
     });
+
+    const isDev = process.env.NODE_ENV === "development";
 
     const body = new FormData();
     body.append("prompt", prompt);
+    if (image) body.append("image", image);
+    if (mask) body.append("mask", mask);
+    if (width) body.append("width", width.toString());
+    if (height) body.append("height", height.toString());
 
     const response = await CWImgGeneration.fetch(
-      env.IMAGE_GENERATE_WORKER_URL,
+      isDev ? "http://localhost:8787" : env.IMAGE_GENERATE_WORKER_URL,
       {
         method: "POST",
         headers: {
-          "Content-Type": "multipart/form-data",
           "x-access-key": env.ACCESS_KEY,
-          "Access-Control-Allow-Origin": "*",
         },
         body,
       }
@@ -35,6 +39,12 @@ export const generateImageAction = actionClient
 
     if (!response.ok || !response.body)
       throw new Error("Image generation failed");
+
+    // return new Response(response.body, {
+    //   headers: {
+    //     "Content-Type": "image/png", // Adjust based on the image type
+    //   },
+    // });
 
     const reader = response.body.getReader();
 
@@ -70,11 +80,6 @@ export const generateImageAction = actionClient
 
     // Convert the Uint8Array to a base64-encoded string
     const base64Image = Buffer.from(concatenatedChunks).toString("base64");
-
-    // const result = fs.writeFileSync(
-    //   "./generatedimage.webp",
-    //   Buffer.from(concatenatedChunks)
-    // );
 
     // Return the base64-encoded image
     return { image: base64Image };
